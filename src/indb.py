@@ -1,4 +1,5 @@
 import re
+from numpy import generic
 import pandas as pd
 from .config import INDB_DIR, DATA_DIR
 from . import vocab
@@ -21,6 +22,11 @@ def add_canonical(rec):
     green = rec.ingredient_name_org.str.contains("green", case=False, na=False)
     rec.loc[chilli & green, "canonical"] = "green chilli"
     rec.loc[chilli & ~green, "canonical"] = "dry red chilli"
+
+    generic = rec.ingredient_name_org.astype(str).str.strip().str.lower().isin(
+        ["fat", "oil or butter", "oil/butter", "oil/ghee"]
+    )
+    rec.loc[generic, "canonical"] = "oil"
     rec["cat"] = rec.canonical.map(vocab.category)
     rec["grams"] = pd.to_numeric(rec.amount, errors="coerce") * rec.unit.map(UNIT_G)
     return rec
