@@ -18,7 +18,14 @@ MANUAL = {"wheat flour","flour","wheat","rice","rice flakes","black gram","benga
  "lentil dal","cream","khoa","jaggery","pasta","mutton","lamb","pomfret","beansprouts","almond","ground nut",
  "cashew nut","pistachio nuts","walnut","raisins","dates","mixed nuts cashews","soy sauce","chilli sauce",
  "tomato sauce","tomato ketchup","mayonnaise","honey","jam","coffee","chocolate","cocoa powder","breadcrumbs","brown bread","white bread","cheddar cheese",
- "processed cheese","broccoli", "tofu", "rajmah", "strawberry jam",
+ "processed cheese","broccoli", "tofu", "rajmah", "strawberry jam","bathua leaves", "jack fruit", "porridge oats", 
+ "beans", "currants", "yam", "seeds", "sultanas", "apricot", "bananas", 
+ "peppers", "yeast extract", "raspberries", "kewra", "margarine", 
+ "amaranth seed", "blueberries", "black beans", "beetroot", "beet root", 
+ "agar", "capers", "peanuts", "olives", "mixed herbs", "lotus stem", 
+ "lemon grass", "cranberries", "gherkins", "ginger juice", "gulkand", 
+ "hazelnuts", "radish leaves", "pine seed", "pickle", "star fruit", 
+ "strawberry", "rosemary", "redcurrants", 
  "currants", "bathua leaves", "jack fruit", "yam", "bananas", "chickpeas (garbanzo beans", "kewra", "lemon peel", "orange peel", "pears", "seeds", "sultanas",
  # Vegetables and fruits
  "broccoli", "turnip", "grapes", "radish", "shallots",
@@ -73,7 +80,7 @@ MANUAL = {"wheat flour","flour","wheat","rice","rice flakes","black gram","benga
 
 IGNORE = {"vanilla extract","kewra essence","red colour", "orange colour", 
           "green colour", "red colour" , "lemon essence"
-          "yellow colour", "yellow color", "tomato colour", 
+          "yellow colour", "yellow color", "tomato colour", "gelatine", "reetha", "msg monosodium glutamate", "yellow colour", "spirits", "tutti frutti gumballs", "candies", "cola", "energy drink", "orange drink", "fruit juice drink/squash", "syrawberry flavour", 
           "lemon color", "lemon colour", "orange and green color",
           "gelatine", "reetha", "candies", "msg monosodium glutamate", "cola", "energy drink", "dressing", "syrup", "yellow colour", 
           "colour", "food colour", "strawberry colour", "essence", 
