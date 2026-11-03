@@ -4,7 +4,7 @@ STAPLE = {"salt","water","oil","sugar","ghee","chilli powder","pepper","garam ma
  "turmeric powder","coriander seeds","cardamom","cloves","cinnamon","bay leaf","mustard seeds","asafoetida",
  "baking powder","bicarbonate of soda","mustard powder","nutmeg","fennel seeds","ajwain seed whole organic spices",
  "himalayan black salt","amchur","fenugreek seeds","dry red chilli","tamarind","vinegar","oregano",
- "poppy seeds","gingelly seeds","citric acid","saffron""tea",
+ "poppy seeds","gingelly seeds","citric acid","saffron","tea",
  "sesame seeds","garlic powder","thyme","basil","star anise","paprika","curry powder",
  "mixed curry spices","balsamic vinegar","rice vinegar","tartaric acid","mace"}
 
@@ -18,7 +18,7 @@ MANUAL = {"wheat flour","flour","wheat","rice","rice flakes","black gram","benga
  "lentil dal","cream","khoa","jaggery","pasta","mutton","lamb","pomfret","beansprouts","almond","ground nut",
  "cashew nut","pistachio nuts","walnut","raisins","dates","mixed nuts cashews","soy sauce","chilli sauce",
  "tomato sauce","tomato ketchup","mayonnaise","honey","jam","coffee","chocolate","cocoa powder","breadcrumbs","brown bread","white bread","cheddar cheese",
- "processed cheese",
+ "processed cheese","broccoli", "tofu", "rajmah", "strawberry jam",
  # Vegetables and fruits
  "broccoli", "turnip", "grapes", "radish", "shallots",
  "guava", "jackfruit", "ladies finger", "bitter gourd",
@@ -71,7 +71,7 @@ MANUAL = {"wheat flour","flour","wheat","rice","rice flakes","black gram","benga
 }
 
 IGNORE = {"vanilla extract","kewra essence","red colour", "orange colour", 
-          "green colour", 
+          "green colour", "red colour" , "lemon essence"
           "yellow colour", "yellow color", "tomato colour", 
           "lemon color", "lemon colour", "orange and green color", 
           "colour", "food colour", "strawberry colour", "essence", 
