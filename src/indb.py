@@ -13,7 +13,9 @@ def load_raw():
     return rec, nut, srv
 
 def _clean(name):
-    return re.sub(r"\s*\(.*?\)", "", str(name).split(",")[0]).strip().lower()
+    text = str(name).split(",")[0].strip().lower()
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 def add_canonical(rec):
     rec = rec.copy()

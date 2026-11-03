@@ -1,4 +1,4 @@
-RENAME = {"lemons": "lemon", "siva's": "amchur"}
+RENAME = {"lemons": "lemon", "siva's": "amchur","lemons": "lemon", "siva's": "amchur", "white channa": "chickpeas",}
 
 STAPLE = {"salt","water","oil","sugar","ghee","chilli powder","pepper","garam masala","cumin seeds",
  "turmeric powder","coriander seeds","cardamom","cloves","cinnamon","bay leaf","mustard seeds","asafoetida",
@@ -19,6 +19,7 @@ MANUAL = {"wheat flour","flour","wheat","rice","rice flakes","black gram","benga
  "cashew nut","pistachio nuts","walnut","raisins","dates","mixed nuts cashews","soy sauce","chilli sauce",
  "tomato sauce","tomato ketchup","mayonnaise","honey","jam","coffee","chocolate","cocoa powder","breadcrumbs","brown bread","white bread","cheddar cheese",
  "processed cheese","broccoli", "tofu", "rajmah", "strawberry jam",
+ "currants", "bathua leaves", "jack fruit", "yam", "bananas", "chickpeas (garbanzo beans", "kewra", "lemon peel", "orange peel", "pears", "seeds", "sultanas",
  # Vegetables and fruits
  "broccoli", "turnip", "grapes", "radish", "shallots",
  "guava", "jackfruit", "ladies finger", "bitter gourd",
@@ -73,7 +74,8 @@ MANUAL = {"wheat flour","flour","wheat","rice","rice flakes","black gram","benga
 IGNORE = {"vanilla extract","kewra essence","red colour", "orange colour", 
           "green colour", "red colour" , "lemon essence"
           "yellow colour", "yellow color", "tomato colour", 
-          "lemon color", "lemon colour", "orange and green color", 
+          "lemon color", "lemon colour", "orange and green color",
+          "gelatine", "reetha", "candies", "msg monosodium glutamate", "cola", "energy drink", "dressing", "syrup", "yellow colour", 
           "colour", "food colour", "strawberry colour", "essence", 
           "lemon essence", "orange essence", "banana essence", 
           "mango essence", "pineapple essence", "almond essence", 
