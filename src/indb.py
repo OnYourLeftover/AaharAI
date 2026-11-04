@@ -5,64 +5,9 @@ import pandas as pd
 from .config import INDB_DIR, DATA_DIR
 from . import vocab
 
-# Approximate unit -> grams (ml treated as g). Units not listed (sprig, nos, pinch...) give NaN grams.
+# Approximate unit -> grams (ml treated as g). Good enough for weighting ingredients.
 UNIT_G = {"g": 1, "ml": 1, "tsp": 5, "tbsp": 15, "C": 240}
-
-# Ordered refinement rules on the ORIGINAL ingredient text: (pattern, canonical, exclude_pattern).
-# Later rules override earlier ones. Patterns are matched against the lower-cased, stripped original name.
-# Edit rules HERE; edit categories in vocab.py.
-RULES = [
-    # chillies are handled separately (they depend on the INDB name too), see add_canonical
-    # bread
-    (r"crumb",                                        "breadcrumbs",       None),
-    (r"brown bread",                                  "brown bread",       None),
-    (r"white bread|bread slice|fresh bread",          "white bread",       r"crumb"),
-    # cheese
-    (r"cheddar",                                      "cheddar cheese",    None),
-    (r"cheese",                                       "processed cheese",  r"cheddar|paneer|cottage"),
-    (r"cottage cheese|paneer",                        "paneer",            None),
-    # chicken
-    (r"chicken",                                      "chicken",           r"bones and|trimming|stock"),
-    (r"^(chicken )?bones and|trimming",               "chicken bones",     None),     # not "boneless" / "with bones"
-    # coconut
-    (r"des?s?iccated|dry coconut|coconut powder",     "dried coconut",     None),
-    (r"fresh coconut",                                "fresh coconut",     None),
-    # cream
-    (r"whipp",                                        "whipping cream",    None),
-    (r"cream",                                        "fresh cream",       r"whipp|ice cream|tartar|sour|cheese|coconut|creamed|milk"),
-    (r"cream of tartar",                              "cream of tartar",   None),
-    (r"sour cream",                                   "sour cream",        None),
-    # eggs
-    (r"egg yolk",                                     "egg yolk",          None),
-    (r"egg white",                                    "egg white",         None),
-    (r"^eggs?$",                                      "whole egg",         None),
-    # flours
-    (r"cornflour|corn flour|corn starch",             "cornflour",         None),
-    (r"besan|gram flour|chickpea flour",              "gram flour",        None),
-    (r"rice flour",                                   "rice flour",        None),
-    (r"whole wheat flour|(?<!maize )\batta\b",        "whole wheat flour", None),
-    (r"refined (wheat )?flour|maida|all purpose flour", "refined flour",   None),
-    # ginger
-    (r"ginger powder|dry ginger|saunth|ground ginger|ginger dry powder", "ground ginger", None),
-    (r"ginger\s*(&|and)?\s*garlic paste",             "ginger garlic paste", None),
-    (r"fresh ginger|ginger paste|grated ginger|shredded ginger", "fresh ginger", r"garlic"),
-    # lemon
-    (r"lemon juice|lime juice",                       "lemon juice",       None),
-    (r"lemon rind",                                   "lemon rind",        None),
-    (r"^lemon$|lemon slice",                          "whole lemon",       None),
-    # milk
-    (r"condensed milk",                               "condensed milk",    None),
-    (r"buttermilk",                                   "buttermilk",        None),
-    (r"^milk$|whole milk|cow's milk|hot milk|full cream milk|full fat milk", "whole milk", None),
-    # wheat products
-    (r"vermicelli",                                   "vermicelli",        None),
-    (r"semolina|suji|\brava\b",                       "semolina",          r"rice rava"),
-    # stock is a liquid base, not the meat/vegetable it is named after (runs last so it wins)
-    (r"\bstock\b",                                    "stock",             r"cube"),
-    # generic fat must not force butter onto a recipe
-    (r"^(fat|oil or butter|oil/butter|oil/ghee)$",    "oil",               None),
-]
-_COMPILED = [(re.compile(p), c, re.compile(x) if x else None) for p, c, x in RULES]
+GENERIC_FAT = {"fat", "oil or butter", "oil/butter", "oil/ghee"}
 
 
 def load_raw():
@@ -81,19 +26,16 @@ def add_canonical(rec: pd.DataFrame) -> pd.DataFrame:
     rec = rec.copy()
     rec["canonical"] = rec.food_name.apply(_clean).replace(vocab.RENAME)
     org = rec.ingredient_name_org.astype(str).str.strip().str.lower()
-
-    # chillies: green vs dry red depends on the original text
     chilli = rec.canonical == "chillies"
     green = org.str.contains("green", na=False)
     rec.loc[chilli & green, "canonical"] = "green chilli"
     rec.loc[chilli & ~green, "canonical"] = "dry red chilli"
-
-    for pat, canon, excl in _COMPILED:
-        m = org.map(lambda s: pat.search(s) is not None)
-        if excl is not None:
-            m &= ~org.map(lambda s: excl.search(s) is not None)
-        rec.loc[m, "canonical"] = canon
-
+    rec.loc[org.isin(GENERIC_FAT), "canonical"] = "oil"       # generic "Fat" must not force butter onto a recipe
+    # Only splits that matter for matching: a detected 'milk' / 'bread' / 'ginger' must not satisfy these.
+    rec.loc[org.str.contains("buttermilk", na=False), "canonical"] = "buttermilk"
+    rec.loc[org.str.contains("condensed milk", na=False), "canonical"] = "condensed milk"
+    rec.loc[org.str.contains(r"bread ?crumb", na=False), "canonical"] = "breadcrumbs"
+    rec.loc[org.str.contains(r"ginger powder|dry ginger|ground ginger|saunth|sonth", na=False), "canonical"] = "ground ginger"
     rec["cat"] = rec.canonical.map(vocab.category)
     rec["grams"] = pd.to_numeric(rec.amount, errors="coerce") * rec.unit.map(UNIT_G)
     return rec
@@ -108,11 +50,17 @@ def nutrition_table(nut: pd.DataFrame, srv: pd.DataFrame) -> pd.DataFrame:
         columns={"remarks_1": "serving_note"})
     t = t.merge(s, on="recipe_code", how="left")
     t["serving_guessed"] = t.serving_note.astype(str).str.contains("guessed", case=False)
+    # INDB.do: serving = recipe total / no_of_servings; unit_serving = serving / size_of_servings.
+    # So `kcal` is per ONE serving unit (1 idli, 1 bowl...) and a typical serving is size_of_servings units.
+    t["kcal_serving"] = t.kcal * t.size_of_servings
+    # INDB sums raw ingredient amounts (all the frying oil, all the syrup), so fried and syrupy dishes come out
+    # inflated (e.g. 4,700 kcal for a bowl of korma). Flag them, show a warning, don't silently trust them.
+    t["nutrition_flag"] = ((t.kcal_100g > 600) | (t.kcal > 800)).map({True: "check", False: ""})
     return t
 
 
 def build_tables(min_cov: float = 0.8, save: bool = True):
-    """Returns (rec, kept, nutrition); writes recipes_clean.csv, recipes_kept.csv, nutrition.csv to DATA_DIR."""
+    """Returns (rec, kept, nutrition) and writes recipes_clean.csv, recipes_kept.csv, nutrition.csv to DATA_DIR."""
     rec, nut, srv = load_raw()
     rec = add_canonical(rec)
     core = rec[rec.cat.isin(["detectable", "manual_add", "other"])]
@@ -124,7 +72,6 @@ def build_tables(min_cov: float = 0.8, save: bool = True):
     kept = per[(per.vocab_cov >= min_cov) & per.index.isin(has_serving)].reset_index()
     nutrition = nutrition_table(nut, srv)
     if save:
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
         rec.to_csv(DATA_DIR / "recipes_clean.csv", index=False)
         kept.to_csv(DATA_DIR / "recipes_kept.csv", index=False)
         nutrition.to_csv(DATA_DIR / "nutrition.csv", index=False)
