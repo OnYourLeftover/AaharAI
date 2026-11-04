@@ -11,3 +11,4 @@ KHANA_CLASSES = [
  "sabudana khichdi","sabudana vada","samosa","seekh kebab","set dosa","sev puri","solkadhi",
  "steamed momo","thali","thukpa","uttapam","vada pav",
 ]
+assert len(KHANA_CLASSES) == 80
