@@ -89,3 +89,12 @@ def category(name: str) -> str:
     if name in IGNORE or _IGNORE_PATTERN.search(name):
         return "ignore"
     return "other"
+
+
+# Used to derive a vegetarian / non-vegetarian flag from a recipe's ingredients (INDB has no diet field).
+NONVEG_PATTERN = re.compile(
+    r"\b(chicken|mutton|lamb|fish|prawns?|pomfret|mackerel|rohu|ham|bacon|salami|sausages?|meat|keema|mince[d]?|egg|eggs)\b")
+
+
+def is_nonveg(name: str) -> bool:
+    return bool(NONVEG_PATTERN.search(name))

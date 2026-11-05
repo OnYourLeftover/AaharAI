@@ -12,8 +12,8 @@ Output: predicted dish (top-5 with confidence) and reference nutrition from INDB
 ## Mode B: Ingredient recognition
 Input: photo of ingredients (fridge, counter, bowl).
 Model: OWLv2, zero-shot (no training), prompts built from `vocab.DETECT`; class-agnostic NMS.
-Output: editable ingredient list, then ranked INDB recipes (coverage first, fewest missing next)
-with nutrition per serving.
+Output: editable ingredient list, then ranked INDB recipes (Jaccard similarity by default; count and weight
+coverage kept as ablation baselines) with nutrition per serving unit and a warning on implausible values.
 
 ## Interface and backend (version 1)
 Python + Gradio. No FastAPI, SQLAlchemy or SQLite in version 1: the data layer is a handful of CSV tables

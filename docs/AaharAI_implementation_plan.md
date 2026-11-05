@@ -362,3 +362,41 @@ AaharAI/
 - INDB: Indian Nutrient Databank. Repository: `github.com/lindsayjaacks/Indian-Nutrient-Databank-INDB`. Paper: *Current Developments in Nutrition*, 2024 (8(7):103790).
 - OWLv2: Hugging Face model `google/owlv2-base-patch16-ensemble`.
 - EfficientNet: Tan and Le (2019), implemented through `timm`.
+
+---
+
+## 16. Decisions log: what changed after the Day 1 data audit
+
+These supersede earlier text in this document where they differ.
+
+### 16.1 INDB data layer
+- Final tables (built by `src/indb.py`): `recipes_clean.csv`, `recipes_kept.csv` (931 recipes with at least 80% of their non-staple ingredients in the vocabulary and serving info), `nutrition.csv`. 526 of the kept recipes have at least 5 core ingredients and are used for the hide-ingredients test.
+- Ingredient categories live in `src/vocab.py` (`detectable`, `manual_add`, `staple`, `ignore`). Real ingredients such as gelatine, syrup and cola are `manual_add`, not `ignore`, so coverage is not inflated. Rule-based renames are limited to splits that matter for matching (buttermilk, condensed milk, breadcrumbs, ground ginger), so the detector label `egg`, `milk`, `lemon` etc. still matches recipe ingredients.
+- Source-data issues documented (not silently fixed): food codes with several names (E017, E516, H018, K505, L002), one recipe-name mismatch (OSR038 Greenpea/Sunflower cookies), 82 recipes without serving info, 203 recipes with a guessed serving unit.
+
+### 16.2 Nutrition caveats
+- `kcal` in `nutrition.csv` is per ONE serving unit (1 idli, 1 bowl, 1 plate). INDB defines serving = recipe total / number of servings, and unit serving = serving / size of serving. `kcal_serving` = `kcal` x size of serving.
+- INDB sums raw ingredient amounts, so fried and syrupy dishes are inflated (for example 4,550 kcal for a plate of onion pakoda). Recipes with more than 600 kcal per 100 g or more than 800 kcal per unit get `nutrition_flag = "check"` (145 of 1,014 recipes). The app shows a warning on these values.
+
+### 16.3 Khana-to-INDB mapping (`mapping.csv`)
+- Statuses: `match` (same dish), `variant` (same dish, different recipe details), `proxy` (closest dish in the same family, shown as approximate), `none` (no nutrition shown).
+- Result: 48 of 80 classes have nutrition (match 36, variant 4, proxy 8 in the first full pass), covering about 72.6% of all Khana images. The earlier target of 60 classes was not reachable because INDB is a home-cooking recipe collection, while Khana includes street food, sweets and non-Indian dishes.
+- The dish classifier is trained on all 80 classes. Nutrition lookup is a separate step and says "nutrition unavailable" for `none`.
+- Khana training: stratified 70/15/15 split, exact duplicates removed, training split capped at 1,000 images per class (validation and test untouched).
+
+### 16.4 Recommender scoring (replaces the coverage-first ranking in section 6.3)
+The hide-ingredients test (fixed seed 42, 503 recipes, Hit@5) showed that coverage-first ranking is fragile. With a realistic pantry that also holds unrelated items, tiny recipes become "fully covered" and win. Jaccard similarity, |have ∩ required| / |have ∪ required|, is far more robust, and weight-based coverage is the weakest. The default is therefore `jaccard`; `count` and `weight` remain as ablation baselines.
+
+| Unrelated items in pantry | Hidden | Count | Weight | Jaccard |
+|---|---|---|---|---|
+| 0 | 20% | 0.72 | 0.49 | 0.99 |
+| 0 | 30% | 0.61 | 0.39 | 0.97 |
+| 0 | 50% | 0.44 | 0.35 | 0.73 |
+| 5 | 20% | 0.33 | 0.11 | 0.87 |
+| 5 | 30% | 0.21 | 0.11 | 0.81 |
+| 5 | 50% | 0.02 | 0.05 | 0.30 |
+| 10 | 20% | 0.05 | 0.01 | 0.52 |
+| 10 | 30% | 0.03 | 0.02 | 0.37 |
+| 10 | 50% | 0.00 | 0.00 | 0.07 |
+
+Reproduce with `notebooks/04_recommender_eval.ipynb`. Limitation: Hit@5 measures recovery of the source recipe, not whether every suggestion is sensible, so the 10-15 manual pantry scenarios in the same notebook are reported alongside it.
