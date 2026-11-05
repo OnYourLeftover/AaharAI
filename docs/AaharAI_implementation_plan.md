@@ -400,3 +400,10 @@ The hide-ingredients test (fixed seed 42, 503 recipes, Hit@5) showed that covera
 | 10 | 50% | 0.00 | 0.00 | 0.07 |
 
 Reproduce with `notebooks/04_recommender_eval.ipynb`. Limitation: Hit@5 measures recovery of the source recipe, not whether every suggestion is sensible, so the 10-15 manual pantry scenarios in the same notebook are reported alongside it.
+
+### 16.5 OWLv2 ingredient detection: first dev results (15 photos of my own kitchen)
+- Setting: OWLv2 `google/owlv2-base-patch16-ensemble`, prompt "a photo of {ingredient}", class-agnostic NMS (IoU 0.5), 41 detector prompts.
+- Micro-averaged over the 15 photos, threshold 0.3: precision 0.47, recall 0.69, F1 0.56 (18 true positives, 20 false positives, 8 misses). At 0.2: precision 0.39, recall 0.69. Lowering the threshold to 0.1 only added one true positive, so recall is capped by something other than the threshold.
+- Reading the errors: 5 of the 8 misses were ingredients outside the detector vocabulary (radish in 4 photos, corn in 1), not model failures, and one "miss" was a capitalisation bug in the evaluation code (`Capsicum` vs `capsicum`). Recall over ingredients the detector is actually asked about was therefore about 0.86-0.9. Precision is the weak part: leafy or small items are over-detected (garlic, carrot, spring onions, lettuce, ginger, cabbage, orange, parsley).
+- Changes made: `radish` and `corn` moved into the detector vocabulary (43 prompts); labels are compared case-insensitively with aliases; the evaluation separates in-vocabulary and out-of-vocabulary misses; threshold, relative-threshold and prompt-template choices are tuned on the dev photos and then confirmed once on a separate held-out set of new photos.
+- Product decision: the detector only *suggests*. Detections at or above the chosen confident threshold are pre-selected in the editable ingredient list; weaker candidates are listed unselected, and the user can always add or remove items manually.

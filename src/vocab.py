@@ -30,6 +30,7 @@ DETECT = {
     "button mushroom", "brinjal - all varieties", "bottle gourd", "pumpkin", "spring onions", "lettuce",
     "celery stalk", "fenugreek leaves", "parsley", "banana", "apple", "mango", "orange", "pineapple", "coconut",
     "egg", "paneer", "bread", "chicken", "milk", "yogurt", "butter", "cheese",
+    "radish", "corn",      # added after the first OWLv2 photo test (radish appeared in 4 of 15 photos)
 }
 
 MANUAL = {
@@ -43,8 +44,8 @@ MANUAL = {
     "mutton", "lamb", "pomfret", "ham", "bacon rashers", "mackerel", "tiger prawns", "rohu", "prawns", "salami",
     "sausages",
     # vegetables, fruit, leaves
-    "broccoli", "turnip", "grapes", "radish", "shallots", "guava", "jack fruit", "ladies finger", "bitter gourd",
-    "colocasia", "corn", "sweetcorn", "curly kale", "pomegranate", "bathua leaves", "yam", "bananas", "beetroot",
+    "broccoli", "turnip", "grapes", "shallots", "guava", "jack fruit", "ladies finger", "bitter gourd",
+    "colocasia", "sweetcorn", "curly kale", "pomegranate", "bathua leaves", "yam", "bananas", "beetroot",
     "beansprouts", "peppers", "lemon grass", "lotus stem", "radish leaves", "amaranth leaves", "mustard leaves",
     "sweet potato", "papaya", "peach", "plum", "kiwi fruit", "litchi", "drumstick", "amla", "tinda", "watercress",
     "bamboo shoot", "lime", "pears", "apricot", "raspberries", "blueberries", "cranberries", "currants",
