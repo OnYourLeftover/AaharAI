@@ -29,6 +29,20 @@ def test_sweep_and_report_run():
     rep, inv, miss_in, miss_oov = de.error_report(RAW, truth, VOCAB, 0.3)
     assert len(rep) == 2 and miss_in["onion"] == 1 and not inv
 
+def test_two_tier_missed_scores_confusions():
+    truth = {"a.jpg": {"tomato", "onion"}, "b.jpg": {"capsicum"}}
+    raw = {"a.jpg": {"tomato": 0.6, "onion": 0.3, "capsicum": 0.28}, "b.jpg": {"tomato": 0.45}}
+    tt = de.two_tier(raw, truth, VOCAB, hi=0.4, lo=0.25)
+    assert abs(tt["confident_precision"] - 0.5) < 1e-9            # tomato right in a.jpg, tomato wrong in b.jpg
+    assert abs(tt["confident_recall"] - 1 / 3) < 1e-9             # only tomato of 3 true items is confident
+    assert abs(tt["candidate_recall"] - 2 / 3) < 1e-9             # onion is a 'maybe'; b's capsicum is never seen
+    assert tt["extra_maybe_per_photo"] == 1.0                     # onion and (wrong) capsicum in a.jpg
+    ms = de.missed_scores(raw, truth, VOCAB, 0.4)
+    assert sorted(ms.label) == ["capsicum", "onion"] and ms.set_index("label").score["onion"] == 0.3
+    rep, *_ = de.error_report(raw, truth, VOCAB, 0.4)
+    assert de.confusions(rep)[("tomato", "capsicum")] == 1
+    assert de.clean_label("Green Onion") == "spring onions"
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

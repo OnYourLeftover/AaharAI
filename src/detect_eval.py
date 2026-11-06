@@ -19,7 +19,8 @@ ALIASES = {"brinjal": "brinjal - all varieties", "eggplant": "brinjal - all vari
            "cilantro": "coriander leaves", "beans": "french beans", "green beans": "french beans",
            "tomatoes": "tomato", "potatoes": "potato", "onions": "onion", "carrots": "carrot", "eggs": "egg",
            "celery": "celery stalk", "mint": "mint leaves", "curd": "yogurt", "curry leaf": "curry leaves",
-           "bell pepper": "capsicum", "lemons": "lemon", "bananas": "banana", "oranges": "orange"}
+           "bell pepper": "capsicum", "green onion": "spring onions", "green onions": "spring onions",
+           "scallion": "spring onions", "scallions": "spring onions", "lemons": "lemon", "bananas": "banana", "oranges": "orange"}
 
 
 def clean_label(s) -> str:
@@ -79,3 +80,44 @@ def error_report(raw, truth, vocab, thr, rel=0.0):
                      "false_pos": ";".join(sorted(fp)), "missed_in_vocab": ";".join(sorted(miss & vocab)),
                      "missed_not_in_vocab": ";".join(sorted(miss - vocab))})
     return pd.DataFrame(rows), invented, missed_in, missed_oov
+
+
+def two_tier(raw: dict, truth: dict, vocab: set, hi: float = 0.4, lo: float = 0.25) -> dict:
+    """UI design check: detections >= hi are pre-selected ('confident'); those in [lo, hi) are listed as unselected 'maybe'.
+    candidate_recall = share of ingredients (in vocabulary) that appear anywhere in either list.
+    extra_maybe_per_photo = how many extra unselected suggestions the user has to look at."""
+    tp = fp = total_in = cand_hit = maybe = n = 0
+    for img, t in truth.items():
+        if img not in raw:
+            continue
+        conf, cand = select(raw[img], hi), select(raw[img], lo)
+        t_in = t & vocab
+        tp += len(conf & t); fp += len(conf - t)
+        total_in += len(t_in); cand_hit += len(cand & t_in)
+        maybe += len(cand - conf); n += 1
+    return {"hi": hi, "lo": lo, "confident_precision": tp / max(tp + fp, 1),
+            "confident_recall": tp / max(total_in, 1), "candidate_recall": cand_hit / max(total_in, 1),
+            "extra_maybe_per_photo": maybe / max(n, 1)}
+
+
+def missed_scores(raw: dict, truth: dict, vocab: set, thr: float) -> pd.DataFrame:
+    """For every in-vocabulary ingredient that was missed at `thr`, the score the detector actually gave it (0 = not seen)."""
+    rows = []
+    for img, t in truth.items():
+        if img not in raw:
+            continue
+        for lab in (t - select(raw[img], thr)) & vocab:
+            rows.append({"image": img, "label": lab, "score": raw[img].get(lab, 0.0)})
+    return pd.DataFrame(rows, columns=["image", "label", "score"])
+
+
+def confusions(rep: pd.DataFrame) -> Counter:
+    """(false positive, missed) pairs that occur together in the same photo: a rough picture of what is confused with what."""
+    c = Counter()
+    for r in rep.itertuples():
+        fps = [x for x in str(r.false_pos).split(";") if x]
+        ms = [x for x in str(r.missed_in_vocab).split(";") if x]
+        for f in fps:
+            for m in ms:
+                c[(f, m)] += 1
+    return c

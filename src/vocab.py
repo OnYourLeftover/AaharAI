@@ -31,6 +31,7 @@ DETECT = {
     "celery stalk", "fenugreek leaves", "parsley", "banana", "apple", "mango", "orange", "pineapple", "coconut",
     "egg", "paneer", "bread", "chicken", "milk", "yogurt", "butter", "cheese",
     "radish", "corn",      # added after the first OWLv2 photo test (radish appeared in 4 of 15 photos)
+    "broccoli", "beetroot",  # added after the held-out test (broccoli was missed 10 times, beetroot 2)
 }
 
 MANUAL = {
@@ -44,8 +45,8 @@ MANUAL = {
     "mutton", "lamb", "pomfret", "ham", "bacon rashers", "mackerel", "tiger prawns", "rohu", "prawns", "salami",
     "sausages",
     # vegetables, fruit, leaves
-    "broccoli", "turnip", "grapes", "shallots", "guava", "jack fruit", "ladies finger", "bitter gourd",
-    "colocasia", "sweetcorn", "curly kale", "pomegranate", "bathua leaves", "yam", "bananas", "beetroot",
+    "turnip", "grapes", "shallots", "guava", "jack fruit", "ladies finger", "bitter gourd",
+    "colocasia", "sweetcorn", "curly kale", "pomegranate", "bathua leaves", "yam", "bananas",
     "beansprouts", "peppers", "lemon grass", "lotus stem", "radish leaves", "amaranth leaves", "mustard leaves",
     "sweet potato", "papaya", "peach", "plum", "kiwi fruit", "litchi", "drumstick", "amla", "tinda", "watercress",
     "bamboo shoot", "lime", "pears", "apricot", "raspberries", "blueberries", "cranberries", "currants",
